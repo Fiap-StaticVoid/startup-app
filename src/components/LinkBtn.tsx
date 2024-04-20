@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet } from "react-native";
-import { Text } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { Href, Link } from "expo-router";
 
 type LinkBtnProps = {
