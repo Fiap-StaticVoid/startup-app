@@ -1,11 +1,31 @@
 import { APIBase } from "./common";
 
+enum TipoFrequencia {
+    minuto = "minutos",
+    hora = "horas",
+    diario = "diario",
+    semanal = "semanal",
+    mensal = "mensal",
+    anual = "anual",
+}
+
 interface Historico {
     id?: string;
     valor: number;
-    usuario_id: string;
+    usuario_id?: string;
     categoria_id: string;
     data: string;
+}
+
+interface LancamentoRecorrente {
+    id?: string;
+    valor: number;
+    usuario_id?: string;
+    categoria_id: string;
+    inicia_em: string;
+    termina_em: string;
+    frequencia: number;
+    tipo_frequencia: TipoFrequencia;
 }
 
 export class APIHistorico extends APIBase {
@@ -18,6 +38,26 @@ export class APIHistorico extends APIBase {
     }
     async update(historico: Historico): Promise<Historico> {
         return await this.patch(`${this.apiUrl}/${historico.id}`, historico);
+    }
+    async delete(id: string): Promise<void> {
+        await this.delete(`${this.apiUrl}/${id}`);
+    }
+}
+
+export class APILancamentoRecorrente extends APIBase {
+    apiPath: string = "lancamentos-recorrentes";
+    async create(
+        lancamento: LancamentoRecorrente
+    ): Promise<LancamentoRecorrente> {
+        return await this.post(this.apiUrl, lancamento);
+    }
+    async read(): Promise<LancamentoRecorrente[]> {
+        return await this.get(this.apiUrl);
+    }
+    async update(
+        lancamento: LancamentoRecorrente
+    ): Promise<LancamentoRecorrente> {
+        return await this.patch(`${this.apiUrl}/${lancamento.id}`, lancamento);
     }
     async delete(id: string): Promise<void> {
         await this.delete(`${this.apiUrl}/${id}`);
