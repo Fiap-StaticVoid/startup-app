@@ -23,7 +23,7 @@ interface LancamentoRecorrente {
     usuario_id?: string;
     categoria_id: string;
     inicia_em: string;
-    termina_em: string;
+    termina_em: string | null;
     frequencia: number;
     tipo_frequencia: TipoFrequencia;
 }
