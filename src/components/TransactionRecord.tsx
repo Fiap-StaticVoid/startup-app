@@ -1,11 +1,12 @@
 ﻿import {Box, Icon, Text} from "native-base";
 import {Ionicons} from "@expo/vector-icons";
-import React from "react";
+import React, {ReactNode} from "react";
 
-interface TransactionRecordProps {
+export interface TransactionRecordProps {
   isPositive: boolean,
   description: string,
   amount: string,
+  children?: ReactNode;
 }
 
 export function TransactionRecord(props: TransactionRecordProps) {
@@ -15,7 +16,8 @@ export function TransactionRecord(props: TransactionRecordProps) {
       <Icon as={Ionicons} name={props.isPositive ? "add" : "remove"} size="60" color={color} borderColor="white.300" alignSelf="center" mr={5} />
       <Box flexDirection="column">
         <Text color={color} fontSize={32} fontFamily="record">R${props.amount}</Text>
-        <Text>{props.description}</Text>
+        <Text mb={2} mt={-2}>{props.description}</Text>
+        {props.children}
       </Box>
     </Box>
   )

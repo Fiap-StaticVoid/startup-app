@@ -20,7 +20,7 @@ export default function App() {
         return <View style={{ flex: 1, backgroundColor: '#fff' }} />;
     }
     
-    console.log("Fonts loaded: ", loaded);
+    //console.log("Fonts loaded: ", loaded);
 
     return (
       <GlobalContext.Provider value={{ name: 'Lorem Ipsum', setName: () => {} }}>

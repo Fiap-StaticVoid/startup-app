@@ -6,9 +6,11 @@ import {Balance} from "./components/Balance";
 import {IconButton} from "./components/IconButton";
 import {TransactionRecord} from "./components/TransactionRecord";
 import {StraightLine} from "./components/StraightLine";
+import {TransactionTag} from "./components/TransactionTag";
+import {TransactionCard} from "./components/TransactionCard";
 
 export default function Dashboard({navigation}: any) {
-
+  
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
@@ -30,19 +32,8 @@ export default function Dashboard({navigation}: any) {
         <Balance>R$ 259.38</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
         <ScrollView>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={false} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
-          <StraightLine/>
-          <TransactionRecord isPositive={true} description={"Burger King"} amount={"36.00"} />
+          <TransactionCard isPositive={true} description="Burger King" amount="36.00" tag={"salário"}/>
+          <TransactionCard isPositive={false} description="Burger King" amount="30.00"/>
         </ScrollView>
       </VStack>
 
