@@ -1,12 +1,11 @@
-import {NativeBaseProvider, StatusBar} from 'native-base';
+import {NativeBaseProvider} from 'native-base';
 import {Theme} from "../styles/light";
-import Homepage from "../Homepage";
-import Login from "../Login";
+import Routes from "../Routes";
 
 export default function App() {
   return (
     <NativeBaseProvider theme={Theme}>
-      <Homepage/>
+      <Routes/>
     </NativeBaseProvider>
   );
 }

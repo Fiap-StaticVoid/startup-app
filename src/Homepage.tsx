@@ -5,13 +5,14 @@ import {useWindowDimensions} from "react-native";
 import {DefaultButton} from "./components/DefaultButton";
 import {SecondaryButton} from "./components/SecondaryButton";
 
-export default function Homepage() {
+export default function Homepage({navigation}: any)
+{
 
   const {width, height} = useWindowDimensions();
   const sphereSize = Math.min(width, height);
 
   return (
-    <Box flex={1}>
+    <Box flex={1} bgColor="white.300">
       <Box
         position="absolute"
         top={0}
@@ -43,8 +44,12 @@ export default function Homepage() {
       <Text fontSize={16} color="black.300" textAlign="center" marginTop={10} lineHeight={20}>Gerencie suas finanças de forma simples e
         eficiente. Acompanhe seus gastos, identifique padrões e tome o controle de sua vida financeira.</Text>
       
-      <DefaultButton>Criar uma conta</DefaultButton>
-      <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar"/>
+      <DefaultButton onPress={() => {
+        navigation.navigate('Register');
+      }}>Criar uma conta</DefaultButton>
+      <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar" onPress={() => {
+        navigation.navigate('Login');
+      }} />
     </VStack>
     </Box>
   );
