@@ -25,7 +25,7 @@ export default function Register({navigation}: any) {
           <InputField placeholder={"Senha"} isPassword={true}/>
         </Box>
         <DefaultButton onPress={() => {
-          navigation.navigate('Homepage'); // TODO: Replace when dashboard is done.
+          navigation.navigate('Dashboard');
         }}>Criar conta</DefaultButton>
         <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar" onPress={() => {
           navigation.navigate('Login');

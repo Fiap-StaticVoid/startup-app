@@ -9,9 +9,9 @@ interface SecondaryButtonProps extends IButtonProps {
 
 export function SecondaryButton({ messageText, actionText, onPress}: SecondaryButtonProps) {
   return (
-    <Box width="100%" flexDirection="row" justifyContent="center" marginTop={3} >
+    <Box width="100%" flexDirection="row" fontFamily="bodyBold" justifyContent="center" marginTop={3} >
       <Text fontSize={16} onPress={onPress}>{messageText} </Text>
-      <TouchableWithoutFeedback onPress={onPress}><Text fontWeight="bold" color="pink.300" fontSize={16}>{actionText}</Text></TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={onPress}><Text fontWeight="bold" color="accent.300" fontSize={16}>{actionText}</Text></TouchableWithoutFeedback>
     </Box>
   )
 }

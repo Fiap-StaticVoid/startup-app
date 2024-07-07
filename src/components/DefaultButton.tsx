@@ -3,14 +3,13 @@ import {ReactNode} from "react";
 
 interface DefaultButtonProps extends IButtonProps {
   children: ReactNode;
+  onPress: () => void;
 }
 
-export function DefaultButton({ children, ...rest }: DefaultButtonProps) {
+export function DefaultButton({ children, onPress, ...rest }: DefaultButtonProps) {
   return (
-    <Button width="100%" backgroundColor="pink.300" borderRadius={17} marginTop={10} py={3.5} {...rest}>
-      <Text fontSize={18} fontWeight="bold" color="white.300" onPress={() => {
-        
-      }}>{children}</Text>
+    <Button width="100%" onPress={onPress} backgroundColor="accent.300" borderRadius={17} marginTop={10} fontFamily="bodyBold" py={3.5} {...rest}>
+      <Text fontSize={18} fontWeight="bold" color="white.300">{children}</Text>
     </Button>
   )
 }

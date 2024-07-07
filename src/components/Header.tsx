@@ -8,7 +8,8 @@ export function Header({ children, ...rest }: HeaderProps) {
   return (
     <Text
     fontSize={24}
-    fontWeight="bold"
+    fontFamily="heading"
+    //fontWeight="bold"
     mt={10}
     mb={5}
     {...rest}>

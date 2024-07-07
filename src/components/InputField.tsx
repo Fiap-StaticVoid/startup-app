@@ -16,9 +16,10 @@ export function InputField(props: InputFieldProps): React.JSX.Element {
       <Input variant="outline"
              borderRadius={15}
              placeholder={props.placeholder}
-             borderColor="pink.300"
+             borderColor="accent.300"
+             fontFamily="body"
              placeholderTextColor="black.300"
-             focusOutlineColor="pink.300"
+             focusOutlineColor="accent.300"
              type={props.isPassword ? (show ? "text" : "password") : "text"}
              secureTextEntry={props.isPassword ? !show : false}
              InputRightElement={
@@ -33,7 +34,7 @@ export function InputField(props: InputFieldProps): React.JSX.Element {
                      as={Ionicons}
                      name={show ? 'eye-off' : 'eye'}
                      size={5}
-                     color="pink.300"
+                     color="accent.300"
                    />
                  </Button>
                ) : undefined

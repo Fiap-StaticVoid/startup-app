@@ -19,7 +19,7 @@ export default function Homepage({navigation}: any)
         left={0}
         right={0}
         bottom="40%"
-        bg="pink.300"
+        bg="accent.300"
         zIndex={-2}
       />
 
@@ -41,7 +41,7 @@ export default function Homepage({navigation}: any)
       <Image source={Logo} alt={"Logo PiggyGuard"}/>
       <Image source={PiggyBank} alt={"Piggybank"} marginTop={10}/>
 
-      <Text fontSize={16} color="black.300" textAlign="center" marginTop={10} lineHeight={20}>Gerencie suas finanças de forma simples e
+      <Text fontSize={16} color="black.300" fontFamily="body" textAlign="center" marginTop={10} lineHeight={20}>Gerencie suas finanças de forma simples e
         eficiente. Acompanhe seus gastos, identifique padrões e tome o controle de sua vida financeira.</Text>
       
       <DefaultButton onPress={() => {

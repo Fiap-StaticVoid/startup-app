@@ -2,14 +2,14 @@
 
 export const Theme = extendTheme({
   colors: {
-    pink: {
+    accent: {
       300: '#F068AA',
     },
-    red: {
-      300: '#FF0000',
+     negative: {
+      300: '#F06868',
     },
-    green: {
-      300: '#00FF00',
+    positive: {
+      300: '#36cc78',
     },
     black: {
       300: '#000000',
@@ -24,8 +24,10 @@ export const Theme = extendTheme({
     //positive: '#00ff00',
   },
   fonts: {
-    heading: "OpenSans",
+    heading: "OpenSansBold",
     body: "OpenSans",
-    mono: "OpenSans",
+    bodyBold: "OpenSansBold",
+    balance: "KodchasanSemiBold",
+    record: "KodchasanBold",
   },
 })
