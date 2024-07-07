@@ -8,7 +8,7 @@ import {InputField} from "./components/InputField";
 export default function Register({navigation}: any) {
 
   return (
-    <Box flex={1}>
+    <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
         <SecondaryButton messageText="" actionText="Voltar" onPress={() => {
           navigation.navigate('Homepage');
