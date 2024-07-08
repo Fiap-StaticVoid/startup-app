@@ -8,6 +8,7 @@ export default function App() {
     const [loaded] = useFonts({
         OpenSans: require('../assets/fonts/OpenSans.ttf'),
         OpenSansBold: require('../assets/fonts/OpenSans-Bold.ttf'),
+        OpenSansSemiBold: require('../assets/fonts/OpenSans-SemiBold.ttf'),
         KodchasanSemiBold: require('../assets/fonts/Kodchasan-SemiBold.ttf'),
         KodchasanBold: require('../assets/fonts/Kodchasan-Bold.ttf'),
     });

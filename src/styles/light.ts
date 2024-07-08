@@ -3,6 +3,7 @@
 export const Theme = extendTheme({
   colors: {
     accent: {
+      100: 'rgba(240,104,170,0.3)',
       300: '#F068AA',
     },
      negative: {
@@ -12,6 +13,7 @@ export const Theme = extendTheme({
       300: '#36cc78',
     },
     black: {
+      100: 'rgba(0,0,0,0.5)',
       300: '#000000',
     },
     white: {
@@ -27,6 +29,7 @@ export const Theme = extendTheme({
     heading: "OpenSansBold",
     body: "OpenSans",
     bodyBold: "OpenSansBold",
+    bodySemiBold: "OpenSansSemiBold",
     balance: "KodchasanSemiBold",
     record: "KodchasanBold",
   },

@@ -6,13 +6,7 @@ interface HeaderProps extends ITextProps {
 }
 export function Header({ children, ...rest }: HeaderProps) {
   return (
-    <Text
-    fontSize={24}
-    fontFamily="heading"
-    //fontWeight="bold"
-    mt={10}
-    mb={5}
-    {...rest}>
+    <Text fontSize={24} fontFamily="heading" mt={10} mb={5} {...rest}>
       {children}
     </Text>
   )
