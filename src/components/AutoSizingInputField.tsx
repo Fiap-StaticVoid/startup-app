@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
-import { Box, Input, Text } from 'native-base';
+import { Box, Input } from 'native-base';
 import { useWindowDimensions, StyleSheet, View, Text as RNText } from 'react-native';
 
 interface SimpleInputFieldProps {

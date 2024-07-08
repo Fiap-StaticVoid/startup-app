@@ -5,7 +5,6 @@ import {ToggleButtons} from "./ToggleButtons";
 import {AutoSizingInputField} from "./AutoSizingInputField";
 import {ActionSheetField} from "./ActionSheetField";
 import {SimpleInputField} from "./SimpleInputField";
-import {StraightLine} from "./StraightLine";
 import {ActionButton} from "./ActionButton";
 
 export function ActionSheetLancamento() {
