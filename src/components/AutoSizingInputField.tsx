@@ -1,10 +1,12 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { Box, Input } from 'native-base';
-import { useWindowDimensions, StyleSheet, View, Text as RNText } from 'react-native';
+import {useWindowDimensions, StyleSheet, View, Text as RNText, KeyboardTypeOptions} from 'react-native';
 
 interface SimpleInputFieldProps {
   placeholder?: string;
   isPassword?: boolean;
+  keyboardType?: KeyboardTypeOptions;
+  onTextChange?: (text: string) => void;
 }
 
 export function AutoSizingInputField(props: SimpleInputFieldProps): React.JSX.Element {
@@ -36,11 +38,15 @@ export function AutoSizingInputField(props: SimpleInputFieldProps): React.JSX.El
         fontFamily="record"
         fontSize={40}
         color={"accent.300"}
+        keyboardType={props.keyboardType}
         
         placeholderTextColor="accent.100"
         width={`${Math.min(inputWidth, screenWidth - 40)}px`} // Adjust width based on screen size
         value={text}
-        onChangeText={(newText: string) => setText(newText)}
+        onChangeText={(newText: string) => {
+          setText(newText.replace(/[^0-9]/g, ''));
+          props.onTextChange?.(text);
+        }}
       />
       <RNText
         ref={hiddenTextRef}

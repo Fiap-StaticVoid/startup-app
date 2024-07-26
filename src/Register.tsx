@@ -4,9 +4,13 @@ import {DefaultButton} from "./components/DefaultButton";
 import {SecondaryButton} from "./components/SecondaryButton";
 import {Header} from "./components/Header";
 import {InputField} from "./components/InputField";
+import React from "react";
 
 export default function Register({navigation}: any) {
 
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
@@ -21,10 +25,11 @@ export default function Register({navigation}: any) {
         <Header>Digite os seus dados</Header>
 
         <Box>
-          <InputField placeholder={"Email"} isPassword={false}/>
-          <InputField placeholder={"Senha"} isPassword={true}/>
+          <InputField placeholder={"Email"} isPassword={false} onChangeText={email => setEmail(email)}/>
+          <InputField placeholder={"Senha"} isPassword={true} onChangeText={pass => setPassword(pass)}/>
         </Box>
         <DefaultButton onPress={() => {
+          // TODO: Register
           navigation.navigate('Dashboard');
         }}>Criar conta</DefaultButton>
         <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar" onPress={() => {

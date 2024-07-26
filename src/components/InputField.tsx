@@ -5,6 +5,7 @@ import {Ionicons} from "@expo/vector-icons";
 interface InputFieldProps {
   placeholder: string;
   isPassword?: boolean;
+  onChangeText?: (text: string) => void;
 }
 
 export function InputField(props: InputFieldProps): React.JSX.Element {

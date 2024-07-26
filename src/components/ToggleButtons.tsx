@@ -2,11 +2,16 @@
 import {Box} from 'native-base';
 import {IconButton} from "./IconButton";
 
-export function ToggleButtons() {
+interface ToggleProps {
+  onSelect: (isPositive: boolean) => void;
+}
+
+export function ToggleButtons(props: ToggleProps) {
   const [selected, setSelected] = useState('1');
 
   const handleButtonPress = (buttonId: '1' | '2') => {
     setSelected(buttonId);
+    props.onSelect(buttonId === '1');
   };
 
   return (
