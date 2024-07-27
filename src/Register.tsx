@@ -4,10 +4,24 @@ import {DefaultButton} from "./components/DefaultButton";
 import {SecondaryButton} from "./components/SecondaryButton";
 import {Header} from "./components/Header";
 import {InputField} from "./components/InputField";
-import React from "react";
+import React, {useState} from "react";
+import {APIUsuarios, Usuario} from "./services/api/usuarios";
 
 export default function Register({navigation}: any) {
 
+  const userAPI = new APIUsuarios(null);
+  
+  const [user, setUser] = useState<Usuario | null>(null);
+  
+  async function register() {
+    const newUser = await userAPI.create({
+      nome: "",
+      email: email,
+      senha: password,
+    });
+    setUser(newUser);
+  }
+  
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   
@@ -29,8 +43,9 @@ export default function Register({navigation}: any) {
           <InputField placeholder={"Senha"} isPassword={true} onChangeText={pass => setPassword(pass)}/>
         </Box>
         <DefaultButton onPress={() => {
-          // TODO: Register
-          navigation.navigate('Dashboard');
+          register().then(() => {
+            navigation.navigate('Dashboard');
+          }).catch((error) => {console.error(error);});
         }}>Criar conta</DefaultButton>
         <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar" onPress={() => {
           navigation.navigate('Login');

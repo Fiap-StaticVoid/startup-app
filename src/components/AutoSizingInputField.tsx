@@ -45,7 +45,7 @@ export function AutoSizingInputField(props: SimpleInputFieldProps): React.JSX.El
         value={text}
         onChangeText={(newText: string) => {
           setText(newText.replace(/[^0-9]/g, ''));
-          props.onTextChange?.(text);
+          props.onTextChange?.(newText.replace(/[^0-9]/g, ''));
         }}
       />
       <RNText

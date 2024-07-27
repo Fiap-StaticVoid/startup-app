@@ -4,9 +4,19 @@ import {DefaultButton} from "./components/DefaultButton";
 import {SecondaryButton} from "./components/SecondaryButton";
 import {Header} from "./components/Header";
 import {InputField} from "./components/InputField";
-import React from "react";
+import React, {useState} from "react";
+import {APIUsuarios, Usuario} from "./services/api/usuarios";
 
 export default function Login({navigation}: any) {
+
+  const userAPI = new APIUsuarios(null);
+  
+  async function login() {
+    await userAPI.login({
+      email: email,
+      senha: password,
+    });
+  }
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -29,8 +39,11 @@ export default function Login({navigation}: any) {
           <InputField placeholder={"Senha"} isPassword={true} onChangeText={pass => setPassword(pass)}/>
         </Box>
         <DefaultButton onPress={() => {
-          // TODO: login
-          navigation.navigate('Dashboard');
+          login().then(() => {
+            navigation.navigate('Dashboard');
+          }).catch((error) => {
+            console.error(error);
+          });
         }}>Logar</DefaultButton>
         <SecondaryButton messageText="Eu ainda não tenho uma conta." actionText="Criar" onPress={() => {
           navigation.navigate('Register');

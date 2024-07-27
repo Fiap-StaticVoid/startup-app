@@ -9,7 +9,7 @@ enum TipoFrequencia {
     anual = "anual",
 }
 
-interface Historico {
+export interface Historico {
     id?: string;
     valor: number;
     usuario_id?: string;
@@ -17,7 +17,7 @@ interface Historico {
     data: string;
 }
 
-interface LancamentoRecorrente {
+export interface LancamentoRecorrente {
     id?: string;
     valor: number;
     usuario_id?: string;

@@ -12,6 +12,7 @@ import {AutoSizingInputField} from "./components/AutoSizingInputField";
 import {ActionSheetField} from "./components/ActionSheetField";
 import {SimpleInputField} from "./components/SimpleInputField";
 import {ActionButton} from "./components/ActionButton";
+import {Historico} from "./services/api/historico";
 
 export default function Dashboard({navigation}: any) {
   const actionSheetRef = useRef<ActionSheetRef>(null);
@@ -90,9 +91,19 @@ export default function Dashboard({navigation}: any) {
   }
   
   const [isPositive, setIsPositive] = React.useState(true);
+  const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
   const [balance, setBalance] = React.useState(249.38);
+  const [transactions, setTransactions] = React.useState<Historico[]>([]);
+  
+  async function createRecord(data: Historico) {
+    setTransactions([...transactions, data]);
+  }
 
+  async function deleteRecord(id: string) {
+    setTransactions(transactions.filter((r) => r.id !== id));
+  }
+  
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
@@ -114,7 +125,11 @@ export default function Dashboard({navigation}: any) {
         <Balance>R$ {balance}</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
         
-        <ActionSheetBase ref={actionSheetRef} title={"Lançamento"}>
+        <ActionSheetBase ref={actionSheetRef} title={"Lançamento"} onSave={() => createRecord({
+          categoria_id: category,
+          data: new Date().toISOString(),
+          valor: parseInt(value) * (isPositive ? 1 : -1)
+        })}>
           <Box>
             {
               sectionIndex === 0 &&
@@ -122,7 +137,7 @@ export default function Dashboard({navigation}: any) {
                 <ToggleButtons onSelect={(pos) => setIsPositive(pos)}/>
                 <Box flexDirection="row" justifyContent='center' alignItems ='center' px={10} pt={5}>
                   <Balance fontSize={40} mr={0}>R$ </Balance>
-                  <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} ></AutoSizingInputField>
+                  <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} onTextChange={setValue} ></AutoSizingInputField>
                   {/*<SimpleInputField textAlign="left" fontSize={40} maxLength={8} fontFamily={"record"} color={"accent.300"} h={16} placeholder={"100,00"} ></SimpleInputField>*/}
                 </Box>
               </Box>
@@ -137,11 +152,11 @@ export default function Dashboard({navigation}: any) {
                     <ActionSheetField title={field.label} key={`title_${field.id}`}>
                       {
                         field.type === "action" &&
-                        <ActionButton title={"" /* Opção escolhida */} onPress={Something} key={`input_${field.id}`}></ActionButton>
+                        <ActionButton title={"" /* Opção escolhida */} onPress={Something} key={`input_action_${field.id}`}></ActionButton>
                       }
                       {
                         field.type === "text" &&
-                        <SimpleInputField placeholder={field.placeholder} key={`input_${field.id}`}/>
+                        <SimpleInputField placeholder={field.placeholder} key={`input_text_${field.id}`}/>
                       }
                     </ActionSheetField>
                       {
@@ -176,8 +191,17 @@ export default function Dashboard({navigation}: any) {
         </ActionSheetBase>
         
         <ScrollView>
-          <TransactionCard isPositive={true} description="Burger King" amount="36.00" tag={"salário"}/>
-          <TransactionCard isPositive={false} description="Burger King" amount="30.00"/>
+          {transactions.map((transaction, index) => (
+            <TransactionCard
+              key={`transaction_card_${index}`}
+              isPositive={transaction.valor > 0}
+              description={transaction.data}
+              amount={Math.abs(transaction.valor).toFixed(2)}
+              tag={transaction.categoria_id}
+            />
+          ))}
+{/*          <TransactionCard isPositive={true} description="Burger King" amount="36.00" tag={"salário"}/>
+          <TransactionCard isPositive={false} description="Burger King" amount="30.00"/>*/}
         </ScrollView>
       </VStack>
 

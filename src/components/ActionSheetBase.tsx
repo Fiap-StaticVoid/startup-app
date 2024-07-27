@@ -7,6 +7,7 @@ import useKeyboardBottomInset from "./CustomUseKeyboardBottomInset";
 interface DefaultActionSheetProps {
   title: string;
   action?: string;
+  onSave?: () => Promise<void>;
   children?: React.ReactNode;
 }
 
@@ -38,7 +39,12 @@ const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((pro
           
           {props.children}
           
-          <DefaultButton onPress={onClose}>{props.action ?? 'Salvar'}</DefaultButton>
+          <DefaultButton onPress={async () => {
+            onClose();
+            if (props.onSave) {
+              await props.onSave();
+            }
+          }}>{props.action ?? 'Salvar'}</DefaultButton>
         </Actionsheet.Content>
       </Actionsheet>
     </Center>
