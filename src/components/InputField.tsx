@@ -21,6 +21,7 @@ export function InputField(props: InputFieldProps): React.JSX.Element {
              fontFamily="body"
              placeholderTextColor="black.300"
              focusOutlineColor="accent.300"
+             onChangeText={props.onChangeText}
              type={props.isPassword ? (show ? "text" : "password") : "text"}
              secureTextEntry={props.isPassword ? !show : false}
              InputRightElement={

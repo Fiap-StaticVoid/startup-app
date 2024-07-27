@@ -15,6 +15,7 @@ export interface Historico {
     usuario_id?: string;
     categoria_id: string;
     data: string;
+    nome: string,
 }
 
 export interface LancamentoRecorrente {
@@ -26,6 +27,7 @@ export interface LancamentoRecorrente {
     termina_em: string | null;
     frequencia: number;
     tipo_frequencia: TipoFrequencia;
+    nome: string,
 }
 
 export class APIHistorico extends APIBase {

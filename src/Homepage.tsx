@@ -4,13 +4,32 @@ import Logo from './assets/LOGO_White.png';
 import {useWindowDimensions} from "react-native";
 import {DefaultButton} from "./components/DefaultButton";
 import {SecondaryButton} from "./components/SecondaryButton";
+import React, {useEffect} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Homepage({navigation}: any)
 {
-
   const {width, height} = useWindowDimensions();
   const sphereSize = Math.min(width, height);
 
+  const [loading, setLoading] = React.useState(true);
+
+  useEffect(() => {
+    async function checkToken() {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        navigation.navigate('Dashboard');
+      }
+      setLoading(false);
+    }
+
+    checkToken();
+  }, []);
+  
+  if (loading) {
+    return null;
+  }
+  
   return (
     <Box flex={1} bgColor="white.300">
       <Box

@@ -89,14 +89,20 @@ export default function Dashboard({navigation}: any) {
   function Something() {
 
   }
-  
+
   const [isPositive, setIsPositive] = React.useState(true);
   const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
-  const [balance, setBalance] = React.useState(249.38);
+  const [name, setName] = React.useState('');
+  
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
   
+  const totalBalance = transactions.reduce((acc, transaction) => acc + transaction.valor, 0);
+  const [balance, setBalance] = React.useState(totalBalance.toFixed(2));
+  
   async function createRecord(data: Historico) {
+    setBalance((total) => (parseFloat(total) + data.valor).toFixed(2));
+    console.log('Creating record:', data.valor, ' | total: ', balance);
     setTransactions([...transactions, data]);
   }
 
@@ -115,6 +121,10 @@ export default function Dashboard({navigation}: any) {
       <Box position="absolute" top="65px" right={15}>
         <IconButton iconName="add" onPress={ () => {
           openActionSheet();
+          setIsPositive(true);
+          setCategory('');
+          setValue('');
+          setName('');
         }}/>
       </Box>
 
@@ -122,13 +132,14 @@ export default function Dashboard({navigation}: any) {
         <Image source={Logo} alt={"Logo PiggyGuard"} alignSelf="center" mt={10}/>
 
         <Header mb={0}>Saldo atual</Header>
-        <Balance>R$ {balance}</Balance>
+        <Balance>{parseInt(balance) < 0 ? "-" : ""}R$ {Math.abs(parseInt(balance)).toFixed(2)}</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
         
         <ActionSheetBase ref={actionSheetRef} title={"Lançamento"} onSave={() => createRecord({
           categoria_id: category,
-          data: new Date().toISOString(),
-          valor: parseInt(value) * (isPositive ? 1 : -1)
+          data: new Date().toDateString(),
+          valor: parseInt(value) * (isPositive ? 1 : -1),
+          nome: name,
         })}>
           <Box>
             {
@@ -156,7 +167,7 @@ export default function Dashboard({navigation}: any) {
                       }
                       {
                         field.type === "text" &&
-                        <SimpleInputField placeholder={field.placeholder} key={`input_text_${field.id}`}/>
+                        <SimpleInputField placeholder={field.placeholder} onChangeText={setName} key={`input_text_${field.id}`}/>
                       }
                     </ActionSheetField>
                       {
@@ -191,11 +202,11 @@ export default function Dashboard({navigation}: any) {
         </ActionSheetBase>
         
         <ScrollView>
-          {transactions.map((transaction, index) => (
+          {transactions.slice().reverse().map((transaction, index) => (
             <TransactionCard
               key={`transaction_card_${index}`}
               isPositive={transaction.valor > 0}
-              description={transaction.data}
+              description={`${transaction.nome}\n${transaction.data}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
               tag={transaction.categoria_id}
             />
