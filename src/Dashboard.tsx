@@ -5,7 +5,7 @@ import {Header} from "./components/Header";
 import {Balance} from "./components/Balance";
 import {IconButton} from "./components/IconButton";
 import {TransactionCard} from "./components/TransactionCard";
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useMemo, useRef} from "react";
 import ActionSheetBase, {ActionSheetRef} from "./components/ActionSheetBase";
 import {ToggleButtons} from "./components/ToggleButtons";
 import {AutoSizingInputField} from "./components/AutoSizingInputField";
@@ -92,9 +92,9 @@ export default function Dashboard({navigation}: any) {
   function Something() {
 
   }
-
-  const historyAPIRef = useRef(new APIHistorico(null));
-
+  
+  let [historyAPI, setHistoryAPI] = React.useState(new APIHistorico(null));
+  
   const [isPositive, setIsPositive] = React.useState(true);
   const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
@@ -102,9 +102,8 @@ export default function Dashboard({navigation}: any) {
   
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
   
-  const totalBalance = transactions.reduce((acc, transaction) => acc + transaction.valor, 0);
-  const [balance, setBalance] = React.useState(totalBalance.toFixed(2));
-
+  const [balance, setBalance] = React.useState((0).toFixed(2));
+  
   useEffect(() => {
     async function retrieveHistory() {
       const token = await AsyncStorage.getItem('token');
@@ -121,22 +120,34 @@ export default function Dashboard({navigation}: any) {
         return null;
       }
       
-      historyAPIRef.current = new APIHistorico(token);
-
-      setTransactions(await historyAPIRef.current.read());
+      setHistoryAPI(new APIHistorico(token));
+      
+      console.log(await historyAPI.read());
+      
+      setTransactions(await historyAPI.read().then((b) => {
+        let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
+        setBalance(a.toFixed(2));
+        return b;
+      }));
+      
     }
 
     retrieveHistory();
   }, []);
 
 
-  async function createRecord(data: Historico) {
-    setBalance((total) => (parseFloat(total) + data.valor).toFixed(2));
-    setTransactions([...transactions, data]);
+  async function createRecord(historico: Historico) {
+    historico.categoria_id = null;
+    historico.data = new Date().toISOString().slice(0, -2);
     
-    await historyAPIRef.current.create(data);
+    console.log("historico: ", historico);
     
-    console.log("Token: ", historyAPIRef.current.token);
+    setBalance((total) => (parseFloat(total) + historico.valor).toFixed(2));
+    setTransactions([...transactions, historico]);
+    
+    historyAPI.create(historico).then().catch((e) => console.error(e));
+    
+    console.log("Token: ", historyAPI.token);
   }
 
   async function deleteRecord(id: string) {
@@ -170,10 +181,10 @@ export default function Dashboard({navigation}: any) {
         
         <ActionSheetBase ref={actionSheetRef} title={"Lançamento"} onSave={() => createRecord({
           categoria_id: category,
-          data: new Date().toDateString(),
+          data: "",
           valor: parseInt(value) * (isPositive ? 1 : -1),
           nome: name,
-        })}>
+        }).then((e) => console.log("then: ", e)).catch((e) => console.error(e))}>
           <Box>
             {
               sectionIndex === 0 &&
@@ -241,7 +252,6 @@ export default function Dashboard({navigation}: any) {
               isPositive={transaction.valor > 0}
               description={`${transaction.nome}\n${transaction.data}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
-              tag={transaction.categoria_id}
             />
           ))}
 {/*          <TransactionCard isPositive={true} description="Burger King" amount="36.00" tag={"salário"}/>
