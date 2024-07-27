@@ -103,6 +103,19 @@ export default function Dashboard({navigation}: any) {
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
   
   const [balance, setBalance] = React.useState((0).toFixed(2));
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
   
   useEffect(() => {
     async function retrieveHistory() {
@@ -137,6 +150,19 @@ export default function Dashboard({navigation}: any) {
 
 
   async function createRecord(historico: Historico) {
+    
+    if (historico.valor === 0 || isNaN(historico.valor)) {
+      toast.show({
+        title: "Valor inválido",
+        description: "O valor informado não é válido. Por favor, verifique o valor e tente novamente.",
+        duration: 3000,
+        backgroundColor: "red.500",
+        
+      });
+      
+      throw new Error("Valor inválido");
+    }
+    
     historico.categoria_id = null;
     historico.data = new Date().toISOString().slice(0, -2);
     
@@ -184,7 +210,7 @@ export default function Dashboard({navigation}: any) {
           data: "",
           valor: parseInt(value) * (isPositive ? 1 : -1),
           nome: name,
-        }).then((e) => console.log("then: ", e)).catch((e) => console.error(e))}>
+        })}>
           <Box>
             {
               sectionIndex === 0 &&
@@ -192,7 +218,12 @@ export default function Dashboard({navigation}: any) {
                 <ToggleButtons onSelect={(pos) => setIsPositive(pos)}/>
                 <Box flexDirection="row" justifyContent='center' alignItems ='center' px={10} pt={5}>
                   <Balance fontSize={40} mr={0}>R$ </Balance>
-                  <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} onTextChange={setValue} ></AutoSizingInputField>
+                  <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
+                    setValue(t);
+                    
+                    let value = parseInt(t.replace(/[^0-9]/g, ''));
+                    actionSheetRef.current?.setCanClose(!isNaN(value) && value != 0);
+                  }} ></AutoSizingInputField>
                   {/*<SimpleInputField textAlign="left" fontSize={40} maxLength={8} fontFamily={"record"} color={"accent.300"} h={16} placeholder={"100,00"} ></SimpleInputField>*/}
                 </Box>
               </Box>
@@ -250,7 +281,7 @@ export default function Dashboard({navigation}: any) {
             <TransactionCard
               key={`transaction_card_${index}`}
               isPositive={transaction.valor > 0}
-              description={`${transaction.nome}\n${transaction.data}`}
+              description={`${transaction.nome}\n${formatDate(transaction.data)}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
             />
           ))}

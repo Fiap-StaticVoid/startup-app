@@ -44,8 +44,9 @@ export function AutoSizingInputField(props: SimpleInputFieldProps): React.JSX.El
         width={`${Math.min(inputWidth, screenWidth - 40)}px`} // Adjust width based on screen size
         value={text}
         onChangeText={(newText: string) => {
-          setText(newText.replace(/[^0-9]/g, ''));
-          props.onTextChange?.(newText.replace(/[^0-9]/g, ''));
+          let text = newText.replace(/[^0-9]/g, '').replace(/^0+/, '');
+          setText(text);
+          props.onTextChange?.(text);
         }}
       />
       <RNText

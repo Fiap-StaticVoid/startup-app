@@ -1,4 +1,4 @@
-﻿import React, { useImperativeHandle, forwardRef } from 'react';
+﻿import React, {useImperativeHandle, forwardRef, useEffect} from 'react';
 import { Center, Actionsheet, Text, Box } from 'native-base';
 import { useDisclose } from 'native-base';
 import {DefaultButton} from "./DefaultButton";
@@ -13,16 +13,21 @@ interface DefaultActionSheetProps {
 
 export interface ActionSheetRef {
   open: () => void;
+  setCanClose: (close: boolean) => void;
 }
 
 const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclose();
   const bottomInset = useKeyboardBottomInset();
-
+  const [canClose, setCanClose] = React.useState(false);
+  
   useImperativeHandle(ref, () => ({
     open: () => {
       onOpen();
     },
+    setCanClose: (close: boolean) => {
+      setCanClose(close);
+    }
   }));
 
   return (
@@ -39,7 +44,7 @@ const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((pro
           
           {props.children}
           
-          <DefaultButton onPress={async () => {
+          <DefaultButton isDisabled={!canClose} onPress={async () => {
             onClose();
             if (props.onSave) {
               await props.onSave();
