@@ -1,18 +1,20 @@
-﻿import {VStack, Image, Box, ScrollView, Text} from "native-base";
+﻿import {VStack, Image, Box, ScrollView, Text, useToast} from "native-base";
 import Logo from './assets/LOGO_Black.png';
 import {SecondaryButton} from "./components/SecondaryButton";
 import {Header} from "./components/Header";
 import {Balance} from "./components/Balance";
 import {IconButton} from "./components/IconButton";
 import {TransactionCard} from "./components/TransactionCard";
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import ActionSheetBase, {ActionSheetRef} from "./components/ActionSheetBase";
 import {ToggleButtons} from "./components/ToggleButtons";
 import {AutoSizingInputField} from "./components/AutoSizingInputField";
 import {ActionSheetField} from "./components/ActionSheetField";
 import {SimpleInputField} from "./components/SimpleInputField";
 import {ActionButton} from "./components/ActionButton";
-import {Historico} from "./services/api/historico";
+import {APIHistorico, Historico} from "./services/api/historico";
+import {APIUsuarios} from "./services/api/usuarios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Dashboard({navigation}: any) {
   const actionSheetRef = useRef<ActionSheetRef>(null);
@@ -22,6 +24,7 @@ export default function Dashboard({navigation}: any) {
     }
   };
   
+  const toast = useToast();
   const [sectionIndex, setSectionIndex] = React.useState(0);
   const sections = [
     {
@@ -90,6 +93,8 @@ export default function Dashboard({navigation}: any) {
 
   }
 
+  const historyAPIRef = useRef(new APIHistorico(null));
+
   const [isPositive, setIsPositive] = React.useState(true);
   const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
@@ -99,11 +104,39 @@ export default function Dashboard({navigation}: any) {
   
   const totalBalance = transactions.reduce((acc, transaction) => acc + transaction.valor, 0);
   const [balance, setBalance] = React.useState(totalBalance.toFixed(2));
-  
+
+  useEffect(() => {
+    async function retrieveHistory() {
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        navigation.navigate('Homepage');
+        toast.show({
+          title: "Erro ao carregar dashboard",
+          description: "Por favor, tente novamente mais tarde.",
+          duration: 3000,
+          backgroundColor: "red.500",
+        })
+
+        return null;
+      }
+      
+      historyAPIRef.current = new APIHistorico(token);
+
+      setTransactions(await historyAPIRef.current.read());
+    }
+
+    retrieveHistory();
+  }, []);
+
+
   async function createRecord(data: Historico) {
     setBalance((total) => (parseFloat(total) + data.valor).toFixed(2));
-    console.log('Creating record:', data.valor, ' | total: ', balance);
     setTransactions([...transactions, data]);
+    
+    await historyAPIRef.current.create(data);
+    
+    console.log("Token: ", historyAPIRef.current.token);
   }
 
   async function deleteRecord(id: string) {
