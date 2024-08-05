@@ -1,5 +1,5 @@
-﻿import React, {useImperativeHandle, forwardRef, useEffect} from 'react';
-import { Center, Actionsheet, Text, Box } from 'native-base';
+﻿import React, {useImperativeHandle, forwardRef} from 'react';
+import { Center, Actionsheet, Text } from 'native-base';
 import { useDisclose } from 'native-base';
 import {DefaultButton} from "./DefaultButton";
 import useKeyboardBottomInset from "./CustomUseKeyboardBottomInset";

@@ -37,7 +37,7 @@ export default function Dashboard({navigation}: any) {
           placeholder: "Nome",
           type: "text",
         },
-        {
+/*        {
           id: 2,
           label: "Recorrência",
           placeholder: "",
@@ -48,7 +48,7 @@ export default function Dashboard({navigation}: any) {
           label: "Tag",
           placeholder: "",
           type: "action",
-        }
+        }*/
       ]
     },
     {
@@ -110,8 +110,6 @@ export default function Dashboard({navigation}: any) {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
       hour12: true,
     };
     return date.toLocaleDateString('en-US', options);
@@ -133,11 +131,10 @@ export default function Dashboard({navigation}: any) {
         return null;
       }
       
-      setHistoryAPI(new APIHistorico(token));
+      let api = new APIHistorico(token);
+      setHistoryAPI(api);
       
-      console.log(await historyAPI.read());
-      
-      setTransactions(await historyAPI.read().then((b) => {
+      setTransactions(await api.read().then((b) => {
         let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
         setBalance(a.toFixed(2));
         return b;
@@ -166,8 +163,6 @@ export default function Dashboard({navigation}: any) {
     historico.categoria_id = null;
     historico.data = new Date().toISOString().slice(0, -2);
     
-    console.log("historico: ", historico);
-    
     setBalance((total) => (parseFloat(total) + historico.valor).toFixed(2));
     setTransactions([...transactions, historico]);
     
@@ -187,9 +182,9 @@ export default function Dashboard({navigation}: any) {
           // TODO: Enable transactions to be trashable
         }}/>
       </Box>
-      
+
       <Box position="absolute" top="65px" right={15}>
-        <IconButton iconName="add" onPress={ () => {
+        <IconButton iconName="add" onPress={() => {
           openActionSheet();
           setIsPositive(true);
           setCategory('');
@@ -204,7 +199,7 @@ export default function Dashboard({navigation}: any) {
         <Header mb={0}>Saldo atual</Header>
         <Balance>{parseInt(balance) < 0 ? "-" : ""}R$ {Math.abs(parseInt(balance)).toFixed(2)}</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
-        
+
         <ActionSheetBase ref={actionSheetRef} title={"Lançamento"} onSave={() => createRecord({
           categoria_id: category,
           data: "",
@@ -212,84 +207,53 @@ export default function Dashboard({navigation}: any) {
           nome: name,
         })}>
           <Box>
-            {
-              sectionIndex === 0 &&
+            {sectionIndex === 0 && (
               <Box>
                 <ToggleButtons onSelect={(pos) => setIsPositive(pos)}/>
-                <Box flexDirection="row" justifyContent='center' alignItems ='center' px={10} pt={5}>
+                <Box flexDirection="row" justifyContent='center' alignItems='center' px={10} pt={5}>
                   <Balance fontSize={40} mr={0}>R$ </Balance>
                   <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
                     setValue(t);
-                    
                     let value = parseInt(t.replace(/[^0-9]/g, ''));
-                    actionSheetRef.current?.setCanClose(!isNaN(value) && value != 0);
-                  }} ></AutoSizingInputField>
-                  {/*<SimpleInputField textAlign="left" fontSize={40} maxLength={8} fontFamily={"record"} color={"accent.300"} h={16} placeholder={"100,00"} ></SimpleInputField>*/}
+                    actionSheetRef.current?.setCanClose(!isNaN(value) && value !== 0);
+                  }} />
                 </Box>
               </Box>
-            }
+            )}
             <Box w="100%" borderColor="accent.300" borderWidth={1.5} borderRadius={15} py={1.5} m={5} mb={-3}>
-              {
-                sections[sectionIndex].inputFields.map((field, index) => {
-                  const isLastField = index === sections[sectionIndex].inputFields.length - 1;
-                  
-                  return (
-                    <Box>
-                    <ActionSheetField title={field.label} key={`title_${field.id}`}>
-                      {
-                        field.type === "action" &&
-                        <ActionButton title={"" /* Opção escolhida */} onPress={Something} key={`input_action_${field.id}`}></ActionButton>
-                      }
-                      {
-                        field.type === "text" &&
-                        <SimpleInputField placeholder={field.placeholder} onChangeText={setName} key={`input_text_${field.id}`}/>
-                      }
-                    </ActionSheetField>
-                      {
-                        !isLastField &&
-                        <Text textAlign={"center"} mt={-2} mb={2} color={"accent.300"} fontFamily={"bodyBold"} key={`line_${field.id}`}>____________________________________________________________________</Text> 
-                      }
-                    </Box>
-                  )
-                })
-              }
-              
-{/*              <ActionSheetField title={"Nome"}>
-                <SimpleInputField placeholder="Nome"/>
-              </ActionSheetField>*/}
-
-              {/* Suddenly StraightLine stopped rendering for some reason */}
-              {/*<StraightLine h={0.5} w="100%"/>*/}
-{/*              <Text textAlign={"center"} mt={-2} mb={2} color={"accent.300"} fontFamily={"bodyBold"}>____________________________________________________________________</Text>
-
-              <ActionSheetField title={"Recorrência"}>
-                <ActionButton title={"" /* Opção escolhida *!/ onPress={Something}></ActionButton>
-              </ActionSheetField>
-
-              <Text textAlign={"center"}  mt={-2} mb={2} color={"accent.300"} fontFamily={"bodyBold"}>____________________________________________________________________</Text>
-
-              <ActionSheetField title={"Tag"}>
-                <ActionButton title={"" /* Opção escolhida *!/ onPress={Something}></ActionButton>
-              </ActionSheetField>*/}
+              {sections[sectionIndex].inputFields.map((field) => (
+                <Box key={`field_container_${field.id}`}>
+                  <ActionSheetField title={field.label}>
+                    {field.type === "action" && (
+                      <ActionButton title={"" /* Opção escolhida */} onPress={Something} key={`input_action_${field.id}`} />
+                    )}
+                    {field.type === "text" && (
+                      <SimpleInputField placeholder={field.placeholder} onChangeText={setName} key={`input_text_${field.id}`} />
+                    )}
+                  </ActionSheetField>
+                  {sections[sectionIndex].inputFields.indexOf(field) < sections[sectionIndex].inputFields.length - 1 && (
+                    <Text textAlign={"center"} mt={-2} mb={2} color={"accent.300"} fontFamily={"bodyBold"} key={`line_${field.id}`}>
+                      ____________________________________________________________________
+                    </Text>
+                  )}
+                </Box>
+              ))}
             </Box>
-
-          </Box>       
+          </Box>
         </ActionSheetBase>
-        
+
         <ScrollView>
           {transactions.slice().reverse().map((transaction, index) => (
             <TransactionCard
-              key={`transaction_card_${index}`}
+              key={`transaction_card_${transaction.id}`} // Ensure each transaction has a unique key
               isPositive={transaction.valor > 0}
               description={`${transaction.nome}\n${formatDate(transaction.data)}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
             />
           ))}
-{/*          <TransactionCard isPositive={true} description="Burger King" amount="36.00" tag={"salário"}/>
-          <TransactionCard isPositive={false} description="Burger King" amount="30.00"/>*/}
         </ScrollView>
       </VStack>
-
     </Box>
+
   );
 }
