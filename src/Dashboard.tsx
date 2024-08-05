@@ -178,9 +178,9 @@ export default function Dashboard({navigation}: any) {
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
-        <SecondaryButton messageText="" actionText="Editar" onPress={() => {
+{/*        <SecondaryButton messageText="" actionText="Editar" onPress={() => {
           // TODO: Enable transactions to be trashable
-        }}/>
+        }}/>*/}
       </Box>
 
       <Box position="absolute" top="65px" right={15}>
