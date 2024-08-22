@@ -5,7 +5,7 @@ import {MaterialIcons} from "@expo/vector-icons";
 
 interface ActionButtonProps extends ITextProps {
   title: string
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function ActionButton({ title, onPress, ...rest }: ActionButtonProps) {
@@ -14,7 +14,7 @@ export function ActionButton({ title, onPress, ...rest }: ActionButtonProps) {
       <Text fontSize={16} fontFamily="body" {...rest} onPress={onPress} color="accent.300">
         {title}
       </Text>
-        <IconButton iconAs={MaterialIcons} iconName={"arrow-forward-ios"} size={4} onPress={onPress}/>
+        <IconButton enabledOpacity={1} disabledOpacity={0} isDisabled={false} iconAs={MaterialIcons} iconName={"arrow-forward-ios"} size={4} onPress={onPress}/>
     </Box>
   )
 }

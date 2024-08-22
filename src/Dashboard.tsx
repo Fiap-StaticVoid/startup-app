@@ -1,11 +1,11 @@
-﻿import {VStack, Image, Box, ScrollView, Text, useToast} from "native-base";
+﻿import {Box, Image, ScrollView, Text, useToast, VStack} from "native-base";
 import Logo from './assets/LOGO_Black.png';
 import {SecondaryButton} from "./components/SecondaryButton";
 import {Header} from "./components/Header";
 import {Balance} from "./components/Balance";
 import {IconButton} from "./components/IconButton";
 import {TransactionCard} from "./components/TransactionCard";
-import React, {useEffect, useMemo, useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import ActionSheetBase, {ActionSheetRef} from "./components/ActionSheetBase";
 import {ToggleButtons} from "./components/ToggleButtons";
 import {AutoSizingInputField} from "./components/AutoSizingInputField";
@@ -13,13 +13,15 @@ import {ActionSheetField} from "./components/ActionSheetField";
 import {SimpleInputField} from "./components/SimpleInputField";
 import {ActionButton} from "./components/ActionButton";
 import {APIHistorico, Historico} from "./services/api/historico";
-import {APIUsuarios} from "./services/api/usuarios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {RadioButton} from "./components/RadioButton";
 
 export default function Dashboard({navigation}: any) {
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const openActionSheet = () => {
     if (actionSheetRef.current) {
+      setSectionIndex(0);
+      setSelectedFields({...selectedFields, 1: {inputId: 2, label: "Nunca"}});
       actionSheetRef.current.open();
     }
   };
@@ -31,78 +33,37 @@ export default function Dashboard({navigation}: any) {
       id: 1,
       title: "Lançamento",
       inputFields: [
-        {
-          id: 1,
-          label: "Nome",
-          placeholder: "Nome",
-          type: "text",
-        },
-/*        {
-          id: 2,
-          label: "Recorrência",
-          placeholder: "",
-          type: "action",
-        },
-        {
-          id: 3,
-          label: "Tag",
-          placeholder: "",
-          type: "action",
-        }*/
+        { id: 1, label: "Nome", placeholder: "Nome", type: "text" },
+        { id: 2, label: "Recorrência", placeholder: "", type: "action" },
+        //{ id: 3, label: "Tag", placeholder: "", type: "action" },
       ]
     },
     {
       id: 2,
       title: "Recorrência",
       inputFields: [
-        {
-          id: 1,
-          label: "Nunca",
-          placeholder: "",
-          type: "radio",
-        },
-        {
-          id: 2,
-          label: "Diariamente",
-          placeholder: "",
-          type: "radio",
-        },
-        {
-          id: 3,
-          label: "Semanalmente",
-          placeholder: "",
-          type: "radio",
-        },
-        {
-          id: 4,
-          label: "Mensalmente",
-          placeholder: "",
-          type: "radio",
-        },
-        {
-          id: 5,
-          label: "Anualmente",
-          placeholder: "",
-          type: "radio",
-        },
+        { id: 1, label: "Nunca", placeholder: "", type: "radio" },
+        { id: 2, label: "Diariamente", placeholder: "", type: "radio" },
+        { id: 3, label: "Semanalmente", placeholder: "", type: "radio" },
+        { id: 4, label: "Mensalmente", placeholder: "", type: "radio" },
+        { id: 5, label: "Anualmente", placeholder: "", type: "radio" },
       ]
     }
-  ]
+  ];
+  
+  const [selectedFields, setSelectedFields] = React.useState<{[sectionId: number]: {inputId: number, label: string}}>({});
 
-  function Something() {
-
+  function openRecurrenceScreen() {
+    setSectionIndex(1);
   }
   
   let [historyAPI, setHistoryAPI] = React.useState(new APIHistorico(null));
-  
   const [isEditable, setIsEditable] = React.useState(false);
   const [isPositive, setIsPositive] = React.useState(true);
   const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
   const [name, setName] = React.useState('');
-  
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
-  
   const [balance, setBalance] = React.useState((0).toFixed(2));
 
   const formatDate = (dateString: string): string => {
@@ -147,7 +108,6 @@ export default function Dashboard({navigation}: any) {
   }, []);
 
   async function createRecord(historico: Historico) {
-    
     if (historico.valor === 0 || isNaN(historico.valor)) {
       toast.show({
         title: "Valor inválido",
@@ -182,6 +142,22 @@ export default function Dashboard({navigation}: any) {
     historyAPI.delete(id).then().catch((e) => console.log(e));
   }
   
+  function handleScreens(label: string, type: string, sectionId: number, inputId: number) {
+    if (type === "action") {
+      if (label === "Recorrência") {
+        openRecurrenceScreen();
+      }
+    } else if (type === "text") {
+      
+    } else if (type === "radio") {
+      
+      setSelectedFields(prev => {
+        return {...prev, [sectionId]: {label, inputId}};
+      });
+      setSectionIndex(0);
+    }
+  }
+
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
@@ -205,7 +181,7 @@ export default function Dashboard({navigation}: any) {
         <Balance>{parseInt(balance) < 0 ? "-" : ""}R$ {Math.abs(parseInt(balance)).toFixed(2)}</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
 
-        <ActionSheetBase ref={actionSheetRef} title={"Lançamento"} onSave={() => createRecord({
+        <ActionSheetBase ref={actionSheetRef} title={sections[sectionIndex].title} onSave={() => createRecord({
           categoria_id: category,
           data: "",
           valor: parseInt(value) * (isPositive ? 1 : -1),
@@ -228,12 +204,15 @@ export default function Dashboard({navigation}: any) {
             <Box w="100%" borderColor="accent.300" borderWidth={1.5} borderRadius={15} py={1.5} m={5} mb={-3}>
               {sections[sectionIndex].inputFields.map((field) => (
                 <Box key={`field_container_${field.id}`}>
-                  <ActionSheetField title={field.label}>
+                  <ActionSheetField title={field.label} onPress={() => { handleScreens(field.label, field.type, sections[sectionIndex].id, field.id) }}>
                     {field.type === "action" && (
-                      <ActionButton title={"" /* Opção escolhida */} onPress={Something} key={`input_action_${field.id}`} />
+                      <ActionButton title={selectedFields[field.id]?.label ?? "AEIou"} key={`input_action_${field.id}`} />
+                    )}
+                    {field.type === "radio" && (
+                      <RadioButton selected={selectedFields[sections[sectionIndex].id]?.inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "text" && (
-                      <SimpleInputField placeholder={field.placeholder} onChangeText={setName} key={`input_text_${field.id}`} />
+                      <SimpleInputField text={name} placeholder={field.placeholder} onChangeText={setName} key={`input_text_${field.id}`} />
                     )}
                   </ActionSheetField>
                   {sections[sectionIndex].inputFields.indexOf(field) < sections[sectionIndex].inputFields.length - 1 && (

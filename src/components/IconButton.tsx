@@ -14,12 +14,11 @@ interface IconButtonProps extends IIconProps {
 
 export function IconButton({ iconName, color, iconAs, onPress, isDisabled, disabledOpacity = 0.5, enabledOpacity = 1, ...rest }: IconButtonProps) {
   const disabled = isDisabled ?? false;
-  const name = disabled ? `${iconName}-outline` : iconName
   const opacity = isDisabled === undefined || disabled ? disabledOpacity : enabledOpacity;
   
   return (
     <Button onPress={onPress} bg='transparent' isDisabled={disabled} opacity={opacity}
-      leftIcon={<Icon as={iconAs ?? Ionicons} m={-1} name={name} size={10} color={color ?? "accent.300"} borderColor="white.300" {...rest} opacity={opacity} />}
+      leftIcon={<Icon as={iconAs ?? Ionicons} m={-1} name={iconName} size={10} color={color ?? "accent.300"} borderColor="white.300" {...rest} opacity={opacity} />}
       _hover={{bg:'transparent'}} _pressed={{bg:'transparent'}}
       _disabled={{bg:'transparent', opacity: 1}} _focus={{bg:'transparent'}}
     />

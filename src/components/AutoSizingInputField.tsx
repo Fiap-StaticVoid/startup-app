@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { Box, Input } from 'native-base';
-import {useWindowDimensions, StyleSheet, View, Text as RNText, KeyboardTypeOptions} from 'react-native';
+import {useWindowDimensions, StyleSheet, Text as RNText, KeyboardTypeOptions} from 'react-native';
 
 interface SimpleInputFieldProps {
   placeholder?: string;
