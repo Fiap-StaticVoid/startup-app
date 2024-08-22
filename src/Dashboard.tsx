@@ -95,6 +95,7 @@ export default function Dashboard({navigation}: any) {
   
   let [historyAPI, setHistoryAPI] = React.useState(new APIHistorico(null));
   
+  const [isEditable, setIsEditable] = React.useState(false);
   const [isPositive, setIsPositive] = React.useState(true);
   const [category, setCategory] = React.useState('');
   const [value, setValue] = React.useState('');
@@ -145,7 +146,6 @@ export default function Dashboard({navigation}: any) {
     retrieveHistory();
   }, []);
 
-
   async function createRecord(historico: Historico) {
     
     if (historico.valor === 0 || isNaN(historico.valor)) {
@@ -163,28 +163,33 @@ export default function Dashboard({navigation}: any) {
     historico.categoria_id = null;
     historico.data = new Date().toISOString().slice(0, -2);
     
-    setBalance((total) => (parseFloat(total) + historico.valor).toFixed(2));
+    calculateBalance(historico.valor, true);
     setTransactions([...transactions, historico]);
     
     historyAPI.create(historico).then().catch((e) => console.error(e));
     
     console.log("Token: ", historyAPI.token);
   }
+  
+  function calculateBalance(value: number, add: boolean) {
+    if (value == 0) return;
+    setBalance((total) => (parseFloat(total) + value * (add ? 1 : -1)).toFixed(2));
+  }
 
   async function deleteRecord(id: string) {
-    setTransactions(transactions.filter((r) => r.id !== id));
+    setTransactions(transactions.filter((transaction) => transaction.id !== id));
+    calculateBalance(transactions.find((transaction) => transaction.id === id)?.valor ?? 0, false);
+    historyAPI.delete(id).then().catch((e) => console.log(e));
   }
   
   return (
     <Box flex={1} bgColor="white.300">
       <Box position="absolute" top="65px" left={-65}>
-{/*        <SecondaryButton messageText="" actionText="Editar" onPress={() => {
-          // TODO: Enable transactions to be trashable
-        }}/>*/}
+{        <SecondaryButton messageText="" actionText={isEditable ? "Voltar" : "Editar"} onPress={() => setIsEditable(!isEditable)}/>}
       </Box>
 
       <Box position="absolute" top="65px" right={15}>
-        <IconButton iconName="add" onPress={() => {
+        <IconButton iconName="add" isDisabled={false} onPress={() => {
           openActionSheet();
           setIsPositive(true);
           setCategory('');
@@ -244,8 +249,9 @@ export default function Dashboard({navigation}: any) {
 
         <ScrollView>
           {transactions.slice().reverse().map((transaction, index) => (
-            <TransactionCard
-              key={`transaction_card_${transaction.id}`} // Ensure each transaction has a unique key
+            <TransactionCard isEditable={isEditable} 
+              onPressDelete={() => deleteRecord(transaction.id ?? "")}
+              key={`transaction_card_${index}`} // Ensure each transaction has a unique key
               isPositive={transaction.valor > 0}
               description={`${transaction.nome}\n${formatDate(transaction.data)}`}
               amount={Math.abs(transaction.valor).toFixed(2)}

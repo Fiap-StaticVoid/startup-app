@@ -6,12 +6,14 @@ import {StraightLine} from "./StraightLine";
 
 interface TransactionCardProps extends TransactionRecordProps {
   tag?: string;
+  onPressDelete: () => void;
+  isEditable: boolean;
 }
 
 export function TransactionCard(props: TransactionCardProps) {
   return (
     <VStack>
-      <TransactionRecord isPositive={props.isPositive} description={props.description} amount={props.amount}>
+      <TransactionRecord isEditable={props.isEditable} isPositive={props.isPositive} description={props.description} amount={props.amount} onPressDelete={props.onPressDelete}>
         {props.tag && <TransactionTag>{props.tag}</TransactionTag>}
       </TransactionRecord>
       <StraightLine/>

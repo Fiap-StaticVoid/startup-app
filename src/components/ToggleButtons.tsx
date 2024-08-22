@@ -16,8 +16,8 @@ export function ToggleButtons(props: ToggleProps) {
 
   return (
     <Box flexDirection="row" justifyContent="center" alignItems="center" mb={0}>
-      <IconButton size={20} opacity={1} isDisabled={selected === '1'} iconName={"add"} onPress={() => handleButtonPress('1')} />
-      <IconButton size={20} isDisabled={selected === '2'} iconName={"remove"} onPress={() => handleButtonPress('2')} />
+      <IconButton size={20} enabledOpacity={0.5} disabledOpacity={1} isDisabled={selected === '1'} iconName={"add"} onPress={() => handleButtonPress('1')} />
+      <IconButton size={20} enabledOpacity={0.5} disabledOpacity={1} isDisabled={selected === '2'} iconName={"remove"} onPress={() => handleButtonPress('2')} />
     </Box>
   );
 };

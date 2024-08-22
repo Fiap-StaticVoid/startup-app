@@ -62,6 +62,25 @@ export default function Register({navigation}: any) {
       email: email,
       senha: password,
     });
+    
+    const token = await userAPI.login({
+      email: email,
+      senha: password,
+    });
+
+    if (token) {
+      await AsyncStorage.setItem('token', token);
+    } else {
+      toast.show({
+        title: "Erro ao carregar dashboard",
+        description: "Tente novamente mais tarde.",
+        duration: 3000,
+        backgroundColor: "red.500",
+      });
+
+      throw new Error("Erro ao carregar dashboard");
+    }
+    
     setUser(newUser);
   }
   
