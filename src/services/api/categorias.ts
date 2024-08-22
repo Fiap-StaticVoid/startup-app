@@ -19,6 +19,6 @@ export class APICategoria extends APIBase {
         return await this.patch(`${this.apiUrl}/${categoria.id}`, categoria);
     }
     async delete(id: string): Promise<void> {
-        await this.delete(`${this.apiUrl}/${id}`);
+        await this._delete(`${this.apiUrl}/${id}`);
     }
 }

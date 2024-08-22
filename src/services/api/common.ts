@@ -47,7 +47,7 @@ export class APIBase {
         return await response.json();
     }
 
-    async delete(url: string): Promise<void> {
+    async _delete(url: string): Promise<void> {
         await this.send("DELETE", url);
     }
 }

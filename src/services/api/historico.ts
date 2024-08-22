@@ -9,7 +9,7 @@ enum TipoFrequencia {
     anual = "anual",
 }
 
-interface Historico {
+export interface Historico {
     id?: string;
     valor: number;
     usuario_id?: string;
@@ -40,7 +40,7 @@ export class APIHistorico extends APIBase {
         return await this.patch(`${this.apiUrl}/${historico.id}`, historico);
     }
     async delete(id: string): Promise<void> {
-        await this.delete(`${this.apiUrl}/${id}`);
+        await this._delete(`${this.apiUrl}/${id}`);
     }
 }
 
@@ -60,6 +60,6 @@ export class APILancamentoRecorrente extends APIBase {
         return await this.patch(`${this.apiUrl}/${lancamento.id}`, lancamento);
     }
     async delete(id: string): Promise<void> {
-        await this.delete(`${this.apiUrl}/${id}`);
+        await this._delete(`${this.apiUrl}/${id}`);
     }
 }

@@ -32,7 +32,7 @@ export class APIUsuarios extends APIBase {
         return await this.patch(`${this.apiUrl}/${usuario.id}`, usuario);
     }
     async delete(id: string): Promise<void> {
-        await this.delete(`${this.apiUrl}/${id}`);
+        await this._delete(`${this.apiUrl}/${id}`);
     }
     async login(dados: DadosLogin): Promise<string> {
         const response = await this.post<DadosLogin, Token>(
