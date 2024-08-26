@@ -4,10 +4,11 @@ import {IconButton} from "./IconButton";
 
 interface ToggleProps {
   onSelect: (isPositive: boolean) => void;
+  defaultValue?: boolean;
 }
 
 export function ToggleButtons(props: ToggleProps) {
-  const [selected, setSelected] = useState('1');
+  const [selected, setSelected] = useState(props.defaultValue ? '1' : '2');
 
   const handleButtonPress = (buttonId: '1' | '2') => {
     setSelected(buttonId);

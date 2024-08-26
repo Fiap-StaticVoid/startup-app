@@ -2,15 +2,16 @@
 import { Box, Input } from 'native-base';
 import {useWindowDimensions, StyleSheet, Text as RNText, KeyboardTypeOptions} from 'react-native';
 
-interface SimpleInputFieldProps {
+interface AutoSizingFieldProps {
+  defaultValue?: string;
   placeholder?: string;
   isPassword?: boolean;
   keyboardType?: KeyboardTypeOptions;
   onTextChange?: (text: string) => void;
 }
 
-export function AutoSizingInputField(props: SimpleInputFieldProps): React.JSX.Element {
-  const [text, setText] = useState<string>('');
+export function AutoSizingInputField(props: AutoSizingFieldProps): React.JSX.Element {
+  const [text, setText] = useState<string>(props.defaultValue || '');
   const [inputWidth, setInputWidth] = useState<number>(100); // Initial width
   const { width: screenWidth } = useWindowDimensions(); // Get screen width for responsiveness
 

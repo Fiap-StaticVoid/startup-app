@@ -25,6 +25,7 @@ import {RadioButton} from "./components/RadioButton";
 export default function Dashboard({navigation}: any) {
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const openActionSheet = () => {
+    setIsEditable(false);
     if (actionSheetRef.current) {
       setSectionIndex(0);
       setSelectedFields({...selectedFields, 2: {inputId: 1, label: "Nunca"}});
@@ -287,10 +288,10 @@ export default function Dashboard({navigation}: any) {
           <Box>
             {sectionIndex === 0 && (
               <Box>
-                <ToggleButtons onSelect={(pos) => setIsPositive(pos)}/>
+                <ToggleButtons defaultValue={isPositive} onSelect={(pos) => setIsPositive(pos)}/>
                 <Box flexDirection="row" justifyContent='center' alignItems='center' px={10} pt={5}>
                   <Balance fontSize={40} mr={0}>R$ </Balance>
-                  <AutoSizingInputField placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
+                  <AutoSizingInputField defaultValue={value} placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
                     setValue(t);
                     let value = parseInt(t.replace(/[^0-9]/g, ''));
                     actionSheetRef.current?.setCanClose(!isNaN(value) && value !== 0);
