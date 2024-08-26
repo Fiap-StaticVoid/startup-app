@@ -1,6 +1,6 @@
 import { APIBase } from "./common";
 
-enum TipoFrequencia {
+export enum TipoFrequencia {
     minuto = "minutos",
     hora = "horas",
     diario = "diario",

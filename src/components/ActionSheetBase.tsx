@@ -14,12 +14,14 @@ interface DefaultActionSheetProps {
 export interface ActionSheetRef {
   open: () => void;
   setCanClose: (close: boolean) => void;
+  setShowSaveButton: (show: boolean) => void;
 }
 
 const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclose();
   const bottomInset = useKeyboardBottomInset();
   const [canClose, setCanClose] = React.useState(false);
+  const [showSaveButton, setShowSaveButton] = React.useState(true);
   
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -27,6 +29,9 @@ const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((pro
     },
     setCanClose: (close: boolean) => {
       setCanClose(close);
+    },
+    setShowSaveButton: (show: boolean) => {
+      setShowSaveButton(show);
     }
   }));
 
@@ -44,7 +49,7 @@ const ActionSheetBase = forwardRef<ActionSheetRef, DefaultActionSheetProps>((pro
           
           {props.children}
           
-          <DefaultButton isDisabled={!canClose} onPress={async () => {
+          <DefaultButton isVisible={showSaveButton} isDisabled={!canClose} onPress={async () => {
             onClose();
             if (props.onSave) {
               await props.onSave();
