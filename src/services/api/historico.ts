@@ -15,7 +15,8 @@ export interface Historico {
     usuario_id?: string;
     categoria_id: string | null;
     data: string;
-    nome: string,
+    nome: string;
+    lancamento_id: string | null;
 }
 
 export interface LancamentoRecorrente {
@@ -27,13 +28,13 @@ export interface LancamentoRecorrente {
     termina_em: string | null;
     frequencia: number;
     tipo_frequencia: TipoFrequencia;
-    nome: string,
+    nome: string;
 }
 
 export class APIHistorico extends APIBase {
     apiPath: string = "historicos";
     async create(historico: Historico): Promise<Historico> {
-        console.log("historico: ", historico)
+        console.log("historico: ", historico);
         return await this.post(this.apiUrl, historico);
     }
     async read(): Promise<Historico[]> {
