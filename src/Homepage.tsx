@@ -63,7 +63,7 @@ export default function Homepage({navigation}: any)
       <Text fontSize={16} color="black.300" fontFamily="body" textAlign="center" marginTop={10} lineHeight={20}>Gerencie suas finanças de forma simples e
         eficiente. Acompanhe seus gastos, identifique padrões e tome o controle de sua vida financeira.</Text>
       
-      <DefaultButton onPress={() => {
+      <DefaultButton marginTop={10} onPress={() => {
         navigation.navigate('Register');
       }}>Criar uma conta</DefaultButton>
       <SecondaryButton messageText="Eu já tenho uma conta." actionText="Logar" onPress={() => {

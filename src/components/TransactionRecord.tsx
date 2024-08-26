@@ -14,7 +14,7 @@ export interface TransactionRecordProps {
 }
 
 export function TransactionRecord(props: TransactionRecordProps) {
-  const color = "accent.300"; // props.isPositive ? "positive.300" : "negative.300";
+  const color = props.isPositive ? "positive.300" : "negative.300";
 
   return (
     <Box flexDirection="row" justifyContent="space-between" alignItems="center">
@@ -29,7 +29,7 @@ export function TransactionRecord(props: TransactionRecordProps) {
           mr={5}
         />
         <Box flexDirection="column">
-          <Balance fontSize={32}>R$ {props.amount}</Balance>
+          <Balance color={color} fontSize={32}>R$ {props.amount}</Balance>
           <Text mb={2} mt={-2}>{props.description}</Text>
           {props.children}
         </Box>

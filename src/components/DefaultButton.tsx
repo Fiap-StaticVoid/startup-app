@@ -3,11 +3,11 @@ import {ReactNode} from "react";
 
 interface DefaultButtonProps extends IButtonProps {
   children: ReactNode;
-  isVisible: boolean;
+  isVisible?: boolean;
   onPress: () => void;
 }
 
-export function DefaultButton({ children, isVisible, onPress, ...rest }: DefaultButtonProps) {
+export function DefaultButton({ children, isVisible = true, onPress, ...rest }: DefaultButtonProps) {
   if (!isVisible) {
     return null;
   }

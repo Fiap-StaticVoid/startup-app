@@ -27,7 +27,7 @@ export default function Dashboard({navigation}: any) {
   const openActionSheet = () => {
     if (actionSheetRef.current) {
       setSectionIndex(0);
-      setSelectedFields({...selectedFields, 2: {inputId: 2, label: "Nunca"}});
+      setSelectedFields({...selectedFields, 2: {inputId: 1, label: "Nunca"}});
       actionSheetRef.current.open();
       setIsPositive(true);
       setCategory('');
@@ -112,12 +112,15 @@ export default function Dashboard({navigation}: any) {
       let apiRecord = new APIHistorico(token);
       setRecordAPI(apiRecord);
       
-      setTransactions(await apiRecord.read().then((b) => {
+      let a = await apiRecord.read().then((b) => {
         let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
         setBalance(a.toFixed(2));
         return b;
-      }));
+      });
       
+      console.log(a);
+      
+      setTransactions(a);
     }
 
     retrieveHistory();
@@ -153,6 +156,7 @@ export default function Dashboard({navigation}: any) {
   }
   
   async function createRecord(record: Historico, recurrence: string, amount: number = 0) {
+    console.log("record: ", record, "recurrence: ", recurrence, "amount: ", amount, "textValues: ", JSON.stringify(textValues));
     if (record.valor === 0 || isNaN(record.valor)) {
       toast.show({
         title: "Valor inválido",
@@ -167,28 +171,27 @@ export default function Dashboard({navigation}: any) {
 
     let date =  new Date();
     
+    record.categoria_id = null;
+    record.data = date.toISOString().slice(0, -2);
+    
     if (recurrence !== "Nunca") {
       let rec: LancamentoRecorrente = {
         valor: record.valor,
-        inicia_em: record.data,
+        inicia_em: date.toISOString().slice(0, -2),
         termina_em: getEndDate(getRecurrenceType(recurrence), amount).toISOString().slice(0, -2),
         categoria_id: null,
         nome: record.nome,
         tipo_frequencia: getRecurrenceType(recurrence),
         frequencia: 1
       };
+      console.log("created rec: ", rec);
       recurrenceAPI.create(rec).then().catch((e) => console.error(e));
+    } else {
+      recordAPI.create(record).then().catch((e) => console.error(e));
     }
-    
-    record.categoria_id = null;
-    record.data = date.toISOString().slice(0, -2);
 
     calculateBalance(record.valor, true);
     setTransactions([...transactions, record]);
-    
-    recordAPI.create(record).then().catch((e) => console.error(e));
-    
-    console.log("Token: ", recordAPI.token);
   }
   
   function calculateBalance(value: number, add: boolean) {
@@ -197,9 +200,21 @@ export default function Dashboard({navigation}: any) {
   }
 
   async function deleteRecord(id: string) {
+    let record = transactions.find((transaction) => transaction.id === id);
+
+    if (record === undefined) {
+      console.error("Failed to find record with id: ", id);
+      return;
+    } 
+    
     setTransactions(transactions.filter((transaction) => transaction.id !== id));
-    calculateBalance(transactions.find((transaction) => transaction.id === id)?.valor ?? 0, false);
+    calculateBalance(record.valor ?? 0, false);
+    
     recordAPI.delete(id).then().catch((e) => console.log(e));
+    
+    if (record.lancamento_id !== null) {
+      recurrenceAPI.delete(record.lancamento_id).then().catch((e) => console.log(e));
+    }
   }
   
   function handleScreens(label: string, type: string, sectionId: number, inputId: number) {
@@ -263,12 +278,12 @@ export default function Dashboard({navigation}: any) {
         <Image source={Logo} alt={"Logo PiggyGuard"} alignSelf="center" mt={10}/>
 
         <Header mb={0}>Saldo atual</Header>
-        <Balance>{parseInt(balance) < 0 ? "-" : ""}R$ {Math.abs(parseInt(balance)).toFixed(2)}</Balance>
+        <Balance color={parseInt(balance) > 0 ? "positive.300" : parseInt(balance) < 0 ? "negative.300" : "accent.300"}>{parseInt(balance) < 0 ? "-" : ""}R$ {Math.abs(parseInt(balance)).toFixed(2)}</Balance>
         <Header mb={2} mt={3}>Extrato</Header>
 
         <ActionSheetBase ref={actionSheetRef} title={sections[sectionIndex].title} onSave={() => createRecord({
-          categoria_id: category, data: "", valor: parseInt(value) * (isPositive ? 1 : -1), nome: textValues[1] ?? ""},
-          selectedFields[1].label, parseInt(textValues[2]))}>
+          categoria_id: category, data: "", valor: parseInt(value) * (isPositive ? 1 : -1), nome: textValues[1] ?? "", lancamento_id: ""},
+          selectedFields[2].label ?? "Nunca", parseInt(textValues[3]))}>
           <Box>
             {sectionIndex === 0 && (
               <Box>
@@ -291,7 +306,7 @@ export default function Dashboard({navigation}: any) {
                       <ActionButton title={getFieldLabel(field)} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "radio" && (
-                      <RadioButton selected={selectedFields[sections[sectionIndex].id]?.inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
+                      <RadioButton selected={selectedFields[sections[sectionIndex].id].inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "text" && (
                       <SimpleInputField text={textValues[field.id] ?? ""} keyboard={field.keyboardType ?? 'default'} placeholder={field.placeholder} onChangeText={text => handleTextChange(field.id, text)} key={`input_text_${field.id}`} />
@@ -314,7 +329,7 @@ export default function Dashboard({navigation}: any) {
               onPressDelete={() => deleteRecord(transaction.id ?? "")}
               key={`transaction_card_${index}`} // Ensure each transaction has a unique key
               isPositive={transaction.valor > 0}
-              description={`${transaction.nome}\n${formatDate(transaction.data)}`}
+              description={`${transaction.nome === null ? "" : (transaction.nome + "\n")}${formatDate(transaction.data)}${transaction.nome === null ? "\n" : ""}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
             />
           ))}

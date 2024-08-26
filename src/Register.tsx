@@ -101,7 +101,7 @@ export default function Register({navigation}: any) {
           <InputField placeholder={"Email"} isPassword={false} onChangeText={email => setEmail(email)}/>
           <InputField placeholder={"Senha"} isPassword={true} onChangeText={pass => setPassword(pass)}/>
         </Box>
-        <DefaultButton onPress={() => {
+        <DefaultButton marginTop={10} onPress={() => {
           register(email, password).then(() => {
             navigation.navigate('Dashboard');
           }).catch((error) => {console.error(error);});
