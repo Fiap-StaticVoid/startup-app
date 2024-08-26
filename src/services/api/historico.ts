@@ -34,7 +34,6 @@ export interface LancamentoRecorrente {
 export class APIHistorico extends APIBase {
     apiPath: string = "historicos";
     async create(historico: Historico): Promise<Historico> {
-        console.log("historico: ", historico);
         return await this.post(this.apiUrl, historico);
     }
     async read(): Promise<Historico[]> {

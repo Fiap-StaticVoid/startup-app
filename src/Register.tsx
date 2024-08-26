@@ -7,6 +7,7 @@ import {InputField} from "./components/InputField";
 import React, {useEffect, useState} from "react";
 import {APIUsuarios, Usuario} from "./services/api/usuarios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {APICategoria} from "./services/api/categorias";
 
 export default function Register({navigation}: any) {
 
@@ -34,7 +35,6 @@ export default function Register({navigation}: any) {
   };
   
   async function register(email: string, password: string) {
-    
     if (!validatePassword(password)) {
       toast.show({
         title: "Senha fraca",
@@ -69,6 +69,8 @@ export default function Register({navigation}: any) {
     });
 
     if (token) {
+
+      
       await AsyncStorage.setItem('token', token);
     } else {
       toast.show({

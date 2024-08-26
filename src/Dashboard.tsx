@@ -21,6 +21,27 @@ import {
 } from "./services/api/historico";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {RadioButton} from "./components/RadioButton";
+import {APICategoria, Categoria} from "./services/api/categorias";
+
+interface InputField {
+  id: number;
+  label: string;
+  placeholder: string;
+  type: string;
+  keyboardType: string;
+}
+
+interface Tag {
+  id: string | undefined;
+  label: string;
+  inputFieldId: number;
+}
+
+interface Section {
+  id: number;
+  title: string;
+  inputFields: InputField[];
+}
 
 export default function Dashboard({navigation}: any) {
   const actionSheetRef = useRef<ActionSheetRef>(null);
@@ -31,7 +52,7 @@ export default function Dashboard({navigation}: any) {
       setSelectedFields({...selectedFields, 2: {inputId: 1, label: "Nunca"}});
       actionSheetRef.current.open();
       setIsPositive(true);
-      setCategory('');
+      setTag('');
       setValue('');
       setTextValues({});
     }
@@ -39,15 +60,17 @@ export default function Dashboard({navigation}: any) {
   
   const toast = useToast();
   const [sectionIndex, setSectionIndex] = React.useState(0);
+  const [tagsFields, setTagsFields] = React.useState<InputField[]>([]);
+
   const sections = [
     {
       id: 1,
       title: "Lançamento",
       inputFields: [
         { id: 1, label: "Nome", placeholder: "Nome", type: "text", keyboardType: 'default' },
+        { id: 4, label: "Categoria", placeholder: "", type: "action", keyboardType: 'default' },
         { id: 2, label: "Recorrência", placeholder: "", type: "action", keyboardType: 'default' },
         { id: 3, label: "Quantas vezes", placeholder: "0", type: "text", keyboardType: 'numeric' },
-        //{ id: 4, label: "Tag", placeholder: "", type: "action", keyboardType: 'default' },
       ]
     },
     {
@@ -60,21 +83,24 @@ export default function Dashboard({navigation}: any) {
         { id: 4, label: "Mensalmente", placeholder: "", type: "radio", keyboardType: 'default' },
         { id: 5, label: "Anualmente", placeholder: "", type: "radio", keyboardType: 'default' },
       ]
+    },
+    {
+      id: 4,
+      title: "Categoria",
+      inputFields: tagsFields
     }
   ];
   
   const [selectedFields, setSelectedFields] = React.useState<{[sectionId: number]: {inputId: number, label: string}}>({[2]: {inputId: 1, label: "Nunca"}});
-
-  function openRecurrenceScreen() {
-    setSectionIndex(1);
-  }
   
   let [recordAPI, setRecordAPI] = React.useState(new APIHistorico(null));
   let [recurrenceAPI, setRecurrenceAPI] = React.useState(new APILancamentoRecorrente(null));
+  let [tagAPI, setTagAPI] = React.useState(new APICategoria(null));
   
   const [isEditable, setIsEditable] = React.useState(false);
   const [isPositive, setIsPositive] = React.useState(true);
-  const [category, setCategory] = React.useState('');
+  const [tag, setTag] = React.useState('');
+  const [tagsList, setTagsList] = React.useState<Tag[]>([]);
   const [value, setValue] = React.useState('');
   const [textValues, setTextValues] = React.useState<{ [fieldId: number]: string }>({});
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
@@ -113,15 +139,36 @@ export default function Dashboard({navigation}: any) {
       let apiRecord = new APIHistorico(token);
       setRecordAPI(apiRecord);
       
-      let a = await apiRecord.read().then((b) => {
+      let apiTag = new APICategoria(token);
+      setTagAPI(apiTag);
+
+      let tags = await apiTag.read();
+      console.log("tags read: ", tags);
+      let list: Tag[] = [];
+      
+      setTagsFields(tags.map((tag, index) => {
+        console.log("tag: ", tag);
+        let i = index+1;
+        list.push({id: tag.id, label: tag.nome, inputFieldId: i});
+        
+        return {
+          id: i,
+          label: tag.nome,
+          placeholder: "",
+          type: "radio",
+          keyboardType: 'default'
+        };
+      }));
+
+      setTagsList(list);
+      
+      let records = await apiRecord.read().then((b) => {
         let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
         setBalance(a.toFixed(2));
         return b;
       });
       
-      console.log(a);
-      
-      setTransactions(a);
+      setTransactions(records);
     }
 
     retrieveHistory();
@@ -157,7 +204,6 @@ export default function Dashboard({navigation}: any) {
   }
   
   async function createRecord(record: Historico, recurrence: string, amount: number = 0) {
-    console.log("record: ", record, "recurrence: ", recurrence, "amount: ", amount, "textValues: ", JSON.stringify(textValues));
     if (record.valor === 0 || isNaN(record.valor)) {
       toast.show({
         title: "Valor inválido",
@@ -185,7 +231,6 @@ export default function Dashboard({navigation}: any) {
         tipo_frequencia: getRecurrenceType(recurrence),
         frequencia: 1
       };
-      console.log("created rec: ", rec);
       recurrenceAPI.create(rec).then().catch((e) => console.error(e));
     } else {
       recordAPI.create(record).then().catch((e) => console.error(e));
@@ -221,7 +266,9 @@ export default function Dashboard({navigation}: any) {
   function handleScreens(label: string, type: string, sectionId: number, inputId: number) {
     if (type === "action") {
       if (label === "Recorrência") {
-        openRecurrenceScreen();
+        setSectionIndex(1);
+      } else if (label === "Categoria") {
+        setSectionIndex(2);
       }
     } else if (type === "text") {
       
@@ -283,7 +330,7 @@ export default function Dashboard({navigation}: any) {
         <Header mb={2} mt={3}>Extrato</Header>
 
         <ActionSheetBase ref={actionSheetRef} title={sections[sectionIndex].title} onSave={() => createRecord({
-          categoria_id: category, data: "", valor: parseInt(value) * (isPositive ? 1 : -1), nome: textValues[1] ?? "", lancamento_id: ""},
+          categoria_id: tag, data: "", valor: parseInt(value) * (isPositive ? 1 : -1), nome: textValues[1] ?? "", lancamento_id: ""},
           selectedFields[2].label ?? "Nunca", parseInt(textValues[3]))}>
           <Box>
             {sectionIndex === 0 && (
@@ -307,7 +354,7 @@ export default function Dashboard({navigation}: any) {
                       <ActionButton title={getFieldLabel(field)} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "radio" && (
-                      <RadioButton selected={selectedFields[sections[sectionIndex].id].inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
+                      <RadioButton selected={selectedFields[sections[sectionIndex].id]?.inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "text" && (
                       <SimpleInputField text={textValues[field.id] ?? ""} keyboard={field.keyboardType ?? 'default'} placeholder={field.placeholder} onChangeText={text => handleTextChange(field.id, text)} key={`input_text_${field.id}`} />
