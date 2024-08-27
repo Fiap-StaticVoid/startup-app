@@ -12,16 +12,10 @@ import {AutoSizingInputField} from "./components/AutoSizingInputField";
 import {ActionSheetField} from "./components/ActionSheetField";
 import {SimpleInputField} from "./components/SimpleInputField";
 import {ActionButton} from "./components/ActionButton";
-import {
-  APIHistorico,
-  APILancamentoRecorrente,
-  Historico,
-  LancamentoRecorrente,
-  TipoFrequencia
-} from "./services/api/historico";
+import {APIHistorico, APILancamentoRecorrente, Historico, LancamentoRecorrente, TipoFrequencia} from "./services/api/historico";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {RadioButton} from "./components/RadioButton";
-import {APICategoria, Categoria} from "./services/api/categorias";
+import {APICategoria} from "./services/api/categorias";
 
 interface InputField {
   id: number;
@@ -49,11 +43,10 @@ export default function Dashboard({navigation}: any) {
     setIsEditable(false);
     if (actionSheetRef.current) {
       setSectionIndex(0);
-      setSelectedFields({...selectedFields, 2: {inputId: 1, label: "Nunca"}});
+      setSelectedFields({...selectedFields, 2: {inputId: 1, label: "Nunca"}, 4: {inputId: 0, label: "Nenhuma"}});
       actionSheetRef.current.open();
       setIsPositive(true);
-      setTag('');
-      setValue('');
+      setrecordValue('');
       setTextValues({});
     }
   };
@@ -99,9 +92,8 @@ export default function Dashboard({navigation}: any) {
   
   const [isEditable, setIsEditable] = React.useState(false);
   const [isPositive, setIsPositive] = React.useState(true);
-  const [tag, setTag] = React.useState('');
   const [tagsList, setTagsList] = React.useState<Tag[]>([]);
-  const [value, setValue] = React.useState('');
+  const [recordValue, setrecordValue] = React.useState('');
   const [textValues, setTextValues] = React.useState<{ [fieldId: number]: string }>({});
   const [transactions, setTransactions] = React.useState<Historico[]>([]);
   const [balance, setBalance] = React.useState((0).toFixed(2));
@@ -143,11 +135,16 @@ export default function Dashboard({navigation}: any) {
       setTagAPI(apiTag);
 
       let tags = await apiTag.read();
-      console.log("tags read: ", tags);
       let list: Tag[] = [];
       
-      setTagsFields(tags.map((tag, index) => {
-        console.log("tag: ", tag);
+      setTagsFields([{
+        id: 0,
+        label: "Nenhuma",
+        placeholder: "",
+        type: "radio",
+        keyboardType: 'default'
+        },
+        ...tags.map((tag, index) => {
         let i = index+1;
         list.push({id: tag.id, label: tag.nome, inputFieldId: i});
         
@@ -158,7 +155,7 @@ export default function Dashboard({navigation}: any) {
           type: "radio",
           keyboardType: 'default'
         };
-      }));
+      })]);
 
       setTagsList(list);
       
@@ -172,7 +169,13 @@ export default function Dashboard({navigation}: any) {
     }
 
     retrieveHistory();
-
+  }, []);
+  
+  useEffect(() => {
+    updateSaveState();
+  }, [recordValue, selectedFields]);
+  
+  useEffect(() => {
     actionSheetRef.current?.setShowSaveButton(sectionIndex === 0);
   }, [sectionIndex]);
 
@@ -203,7 +206,7 @@ export default function Dashboard({navigation}: any) {
     return date;
   }
   
-  async function createRecord(record: Historico, recurrence: string, amount: number = 0) {
+  async function createRecord(record: Historico, recurrence: string, amount: number = 0, tagLabel: string = "") {
     if (record.valor === 0 || isNaN(record.valor)) {
       toast.show({
         title: "Valor inválido",
@@ -218,15 +221,15 @@ export default function Dashboard({navigation}: any) {
 
     let date =  new Date();
     
-    record.categoria_id = null;
     record.data = date.toISOString().slice(0, -2);
+    record.categoria_id = tagsList.find(tag => tag.label === tagLabel)?.id ?? "";
     
     if (recurrence !== "Nunca") {
       let rec: LancamentoRecorrente = {
         valor: record.valor,
         inicia_em: date.toISOString().slice(0, -2),
         termina_em: getEndDate(getRecurrenceType(recurrence), amount).toISOString().slice(0, -2),
-        categoria_id: null,
+        categoria_id: record.categoria_id,
         nome: record.nome,
         tipo_frequencia: getRecurrenceType(recurrence),
         frequencia: 1
@@ -235,7 +238,7 @@ export default function Dashboard({navigation}: any) {
     } else {
       recordAPI.create(record).then().catch((e) => console.error(e));
     }
-
+    
     calculateBalance(record.valor, true);
     setTransactions([...transactions, record]);
   }
@@ -283,12 +286,15 @@ export default function Dashboard({navigation}: any) {
   }
 
   function handleTextChange(fieldId: number, text: string) {
-    setTextValues(prev => ({
-      ...prev,
-      [fieldId]: text
-    }));
+    setTextValues(prev => {
+      const updatedValues = {
+        ...prev,
+        [fieldId]: text
+      };
+      updateSaveState(updatedValues);
+      return updatedValues;
+    });
   }
-
 
   function getFieldLabel(field: { id: number; label: string; placeholder: string; type: string }) {
     return selectedFields[field.id]?.label ?? "";
@@ -307,6 +313,19 @@ export default function Dashboard({navigation}: any) {
     const nextFieldId = sections[sectionIndex].inputFields[fieldIndex + 1].id;
 
     return canShowAmountField(sectionIndex, fieldId) && canShowAmountField(sectionIndex, nextFieldId);
+  }
+  
+  function updateSaveState(updatedTextValues = textValues) {
+    let value = parseInt(recordValue.replace(/[^0-9]/g, ''));
+    
+    console.log("Value: ", value);
+    
+    actionSheetRef.current?.setCanSave(
+      !isNaN(value) &&
+      value !== 0 &&
+      (((selectedFields[2].label ?? "Nunca") != "Nunca" && parseInt(updatedTextValues[3]) > 0) ||
+      (selectedFields[2].label ?? "Nunca") === "Nunca"))
+    ;
   }
 
 
@@ -330,18 +349,17 @@ export default function Dashboard({navigation}: any) {
         <Header mb={2} mt={3}>Extrato</Header>
 
         <ActionSheetBase ref={actionSheetRef} title={sections[sectionIndex].title} onSave={() => createRecord({
-          categoria_id: tag, data: "", valor: parseInt(value) * (isPositive ? 1 : -1), nome: textValues[1] ?? "", lancamento_id: ""},
-          selectedFields[2].label ?? "Nunca", parseInt(textValues[3]))}>
+          categoria_id: "", data: "", valor: parseInt(recordValue) * (isPositive ? 1 : -1), nome: textValues[1] ?? "", lancamento_id: ""},
+          selectedFields[2].label ?? "Nunca", parseInt(textValues[3]), selectedFields[4].label)}>
           <Box>
             {sectionIndex === 0 && (
               <Box>
                 <ToggleButtons defaultValue={isPositive} onSelect={(pos) => setIsPositive(pos)}/>
                 <Box flexDirection="row" justifyContent='center' alignItems='center' px={10} pt={5}>
                   <Balance fontSize={40} mr={0}>R$ </Balance>
-                  <AutoSizingInputField defaultValue={value} placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
-                    setValue(t);
-                    let value = parseInt(t.replace(/[^0-9]/g, ''));
-                    actionSheetRef.current?.setCanClose(!isNaN(value) && value !== 0);
+                  <AutoSizingInputField defaultValue={recordValue} placeholder={"0,00"} keyboardType={'numeric'} onTextChange={(t) => {
+                    setrecordValue(t);
+                    updateSaveState();
                   }} />
                 </Box>
               </Box>
@@ -354,10 +372,11 @@ export default function Dashboard({navigation}: any) {
                       <ActionButton title={getFieldLabel(field)} key={`input_action_${field.id}`} />
                     )}
                     {field.type === "radio" && (
-                      <RadioButton selected={selectedFields[sections[sectionIndex].id]?.inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} />
+                      <RadioButton selected={selectedFields[sections[sectionIndex].id]?.inputId ?? 0} buttonId={field.id} key={`input_action_${field.id}`} onPress={updateSaveState} />
                     )}
                     {field.type === "text" && (
-                      <SimpleInputField text={textValues[field.id] ?? ""} keyboard={field.keyboardType ?? 'default'} placeholder={field.placeholder} onChangeText={text => handleTextChange(field.id, text)} key={`input_text_${field.id}`} />
+                      <SimpleInputField text={textValues[field.id] ?? ""} keyboard={field.keyboardType ?? 'default'} placeholder={field.placeholder}
+                                        onChangeText={(text) => {handleTextChange(field.id, text);}} key={`input_text_${field.id}`} />
                     )}
                   </ActionSheetField>)}
                   {shouldShowLine(sectionIndex, field.id) && (
@@ -376,7 +395,7 @@ export default function Dashboard({navigation}: any) {
             <TransactionCard isEditable={isEditable} 
               onPressDelete={() => deleteRecord(transaction.id ?? "")}
               key={`transaction_card_${index}`} // Ensure each transaction has a unique key
-              isPositive={transaction.valor > 0}
+              isPositive={transaction.valor > 0} tag={tagsList.find(tag => tag.id === transaction.categoria_id)?.label}
               description={`${transaction.nome === null ? "" : (transaction.nome + "\n")}${formatDate(transaction.data)}${transaction.nome === null ? "\n" : ""}`}
               amount={Math.abs(transaction.valor).toFixed(2)}
             />
