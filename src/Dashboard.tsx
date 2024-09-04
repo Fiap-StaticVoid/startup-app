@@ -110,7 +110,7 @@ export default function Dashboard({navigation}: any) {
   };
   
   useEffect(() => {
-    async function retrieveHistory() {
+    async function initAPIs() {
       const token = await AsyncStorage.getItem('token');
 
       if (!token) {
@@ -156,20 +156,28 @@ export default function Dashboard({navigation}: any) {
           keyboardType: 'default'
         };
       })]);
-
+      
       setTagsList(list);
-      
-      let records = await apiRecord.read().then((b) => {
-        let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
-        setBalance(a.toFixed(2));
-        return b;
-      });
-      
-      setTransactions(records);
     }
 
-    retrieveHistory();
+    initAPIs();
   }, []);
+
+  useEffect(() => {
+    retrieveHistory();
+  }, [recordAPI]);
+
+  async function retrieveHistory() {
+    if (recordAPI.token == null) return;
+    
+    let records = await recordAPI.read().then((b) => {
+      let a = b.reduce((acc, transaction) => acc + transaction.valor, 0);
+      setBalance(a.toFixed(2));
+      return b;
+    });
+
+    setTransactions(records);
+  }
   
   useEffect(() => {
     updateSaveState();
@@ -213,7 +221,6 @@ export default function Dashboard({navigation}: any) {
         description: "O valor informado não é válido. Por favor, verifique o valor e tente novamente.",
         duration: 3000,
         backgroundColor: "red.500",
-        
       });
       
       throw new Error("Valor inválido");
@@ -222,7 +229,7 @@ export default function Dashboard({navigation}: any) {
     let date =  new Date();
     
     record.data = date.toISOString().slice(0, -2);
-    record.categoria_id = tagsList.find(tag => tag.label === tagLabel)?.id ?? "";
+    record.categoria_id = tagsList.find(tag => tag.label === tagLabel)?.id ?? null
     
     if (recurrence !== "Nunca") {
       let rec: LancamentoRecorrente = {
@@ -234,13 +241,12 @@ export default function Dashboard({navigation}: any) {
         tipo_frequencia: getRecurrenceType(recurrence),
         frequencia: 1
       };
-      recurrenceAPI.create(rec).then().catch((e) => console.error(e));
+      await recurrenceAPI.create(rec).then().catch((e) => console.error(e));
     } else {
-      recordAPI.create(record).then().catch((e) => console.error(e));
+      await recordAPI.create(record).then().catch((e) => console.error(e));
     }
     
-    calculateBalance(record.valor, true);
-    setTransactions([...transactions, record]);
+    await retrieveHistory();
   }
   
   function calculateBalance(value: number, add: boolean) {
@@ -256,14 +262,13 @@ export default function Dashboard({navigation}: any) {
       return;
     } 
     
-    setTransactions(transactions.filter((transaction) => transaction.id !== id));
-    calculateBalance(record.valor ?? 0, false);
-    
-    recordAPI.delete(id).then().catch((e) => console.log(e));
+    await recordAPI.delete(id).then().catch((e) => console.log(e));
     
     if (record.lancamento_id !== null) {
-      recurrenceAPI.delete(record.lancamento_id).then().catch((e) => console.log(e));
+      await recurrenceAPI.delete(record.lancamento_id).then().catch((e) => console.log(e));
     }
+    
+    await retrieveHistory();
   }
   
   function handleScreens(label: string, type: string, sectionId: number, inputId: number) {
@@ -317,8 +322,6 @@ export default function Dashboard({navigation}: any) {
   
   function updateSaveState(updatedTextValues = textValues) {
     let value = parseInt(recordValue.replace(/[^0-9]/g, ''));
-    
-    console.log("Value: ", value);
     
     actionSheetRef.current?.setCanSave(
       !isNaN(value) &&
