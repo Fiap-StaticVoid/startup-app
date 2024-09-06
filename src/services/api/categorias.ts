@@ -4,6 +4,7 @@ export interface Categoria {
     id?: string;
     nome: string;
     descricao: string | null;
+    usuario_id: string | null;
 }
 
 export class APICategoria extends APIBase {
